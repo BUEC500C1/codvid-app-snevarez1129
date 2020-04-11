@@ -1,4 +1,4 @@
-# covid-app-snevarez1129
+# codvid-app-snevarez1129
 
 ## Assignment
 Use CODVID-19 API (Documentation using postman) to build mobile application that displays:
