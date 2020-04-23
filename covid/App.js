@@ -2,9 +2,6 @@ import React, { useState, Component } from 'react';
 import { StyleSheet, View, Text, TextInput, Button } from 'react-native';
 import Geocode from 'react-geocode';
 
-Geocode.setApiKey('AIzaSyADngNkHzLlRz6na_xaPRCvq6EgyYiyWXU');
-Geocode.setLanguage('en');
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -46,7 +43,7 @@ export default class App extends Component {
 
     this.state.loaded = false;
 
-    Geocode.setApiKey('AIzaSyBgiT9hVRgoaddMKDA2zzNe0aqlFF5m5NA');
+    Geocode.setApiKey('');
     Geocode.setLanguage('en');
     Geocode.fromAddress(this.state.search).then(
       response => {
