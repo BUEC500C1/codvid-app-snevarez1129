@@ -1,13 +1,16 @@
 import React, { useState, Component } from 'react';
-import { StyleSheet, View, Text, TextInput } from 'react-native';
+import { StyleSheet, View, Text, TextInput, Button } from 'react-native';
 import Geocode from 'react-geocode';
+
+Geocode.setApiKey('AIzaSyADngNkHzLlRz6na_xaPRCvq6EgyYiyWXU');
+Geocode.setLanguage('en');
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20
+    justifyContent: 'center'
   }
 });
 
@@ -16,146 +19,98 @@ export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      userInput: "",
+      search: "",
       loaded: true,
       country: "",
-      short: "",
       region: {
-        latitude: 0,
-        longitude: 0,
-        latitudeDelta: 60,
-        longitudeDelta: 60
+        latitude: 42.361145,
+        longitude: -71.057083,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421
       },
-      data: {
-        confirmed: 0,
-        active: 0,
-        recovered: 0,
-        dead: 0
-      },
-      wrld: {
-        confirmed: 0,
-        active: 0,
-        recovered: 0,
-        dead: 0
-      },
-      markers: []
+      cases: 0,
     };
 
-    Geocode.setApiKey('AIzaSyADngNkHzLlRz6na_xaPRCvq6EgyYiyWXU');
-    Geocode.setLanguage('en');
-
-    this.handleInput = this.handleInput.bind(this);
-    this.setCountry = this.setCountry.bind(this);
+    this.handleSearch = this.handleSearch.bind(this);
     this.APIcall = this.APIcall.bind(this);
   }
 
-  handleInput = input => {
-    this.setState({userInput: input});
+  handleSearch = search => {
+    this.setState({search: search});
   }
 
-  setCountry(country) {
-    let longAddr = country;
-    let shortAddr = '';
-    let addr = '';
-
-    if (longAddr.length > 15) {
-      addr = longAddr.split(' ');
-      for (var i in addr) {
-        shortAddr += addr[i][0],
-        console.log('SHORT ADDR: ' + shortAddr);
-      }
-    } else {
-      shortAddr = longAddr;
+  APIcall = () => {
+    if (this.state.search === '') {
+      return;
     }
 
-    this.setState({
-      country: this.state.longAddr,
-      short: shortAddr
-    });
-  }
+    this.state.loaded = false;
 
-  countryChange() {
-    console.log('ENTERED: ' + input);
-
-    Geocode.fromAddress(next).then(
+    Geocode.setApiKey('AIzaSyBgiT9hVRgoaddMKDA2zzNe0aqlFF5m5NA');
+    Geocode.setLanguage('en');
+    Geocode.fromAddress(this.state.search).then(
       response => {
-        const {lat, lon} = response.results[0].geometry.location;
-        let country = '';
-        let region = '';
-        for (var i in response.results[0].address_components) {
-          if (response.results[0].address_components[i].types.includes('country')) {
-            country = response.results[0].address_components[i].long_name;
-          }
-        }
-
-        console.log('Valentina ' + country);
+        const {lat, lng} = response.results[0].geometry.location;
         this.setState({
           region: {
             latitude: lat,
-            longitude: lon
-          }
+            longitude: lng,
+            latitudeDelta: 0.92,
+            longitudeDelta: 0.0421,
+          },
         });
-        this.APIcall(country);        
-        this.setCountry(country);
       },
       error => {
-        return;
+        console.error(error);
       },
     );
-  }
 
-  APIcall(country, marker, latitude, longitude) {
-    this.setState({loaded: false});
-    console.log('GETTING CASES FOR ' + country);
-    
-    fetch('https://api.covid19api.com/total/country/' + country, {
+    fetch('https://api.covid19api.com/country/' + this.state.search + '/status/confirmed/live?from=2020-03-01T00:00:00Z&to=2020-04-01T00:00:00Z', {
       method: 'GET',
       headers: {
         Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    })
-
+        'Content-Type': 'application/json'
+        }
+      }
+    )
+    
     .then(response => {
       return response.json();
     })
-
+      
     .then(responseData => {
-      return responseData[responseData.length - 1];
+      console.log(responseData[0]);
+      return responseData[0];
     })
-
+      
     .then(data => {
-      if (data === undefined) {
-        this.setState({loaded: false});
-        return;
-      }
-      this.setState((prevState, props) => {
-        return {
-          data: {
-            confirmed: data.Confirmed,
-            active: data.Confirmed - data.Recovered - data.Deaths,
-            recovered: data.Recovered,
-            dead: data.Deaths,
-          },
-        };
-      });
+      this.setState({cases: data.Cases});
+      console.log('cases: ' + data.Cases);
     })
 
     .catch(err => {
-      this.setState({loaded: false});
-      console.log('ERROR: ' + err);
+      console.log('fetch error' + err);
     });
+
+    this.setState({country: this.state.search});
+    this.setState({search: ''});
+    if (this.state.loaded === false) {
+      this.setState({loaded: true});
+      console.log('DONE')
+    }
   }
 
   render() {
     return (
       <View style={styles.container}>
-        <Text>Enter a Location to LookUp</Text>
+        <Text>Enter a Country to LookUp</Text>
         <TextInput 
-          defaultValue="Type Here" 
-          onChangeText={this.handleInput} />
-        <Text>You entered: {this.state.search}</Text>
-        <Text>country: {this.state.country}</Text>
+          placeholder="Search" 
+          onChangeText={this.handleSearch}
+          value={this.state.search} />
+        <Button
+          title='Search'
+          onPress={this.APIcall} />
       </View>
     );
   }
