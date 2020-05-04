@@ -15,4 +15,7 @@ Use CODVID-19 API (Documentation using postman) to build mobile application that
 ## Progress
 
 ![](screenshots/map.png)
+* This is a the map the user sees
+
 ![](screenshots/search.png)
+* This is where the user can enter a country to call the API with.
