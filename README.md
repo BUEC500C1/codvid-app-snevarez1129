@@ -11,3 +11,8 @@ Use CODVID-19 API (Documentation using postman) to build mobile application that
 ###### Stretch goal:
 * Display data per Province
 * User can put their address and track CODVID-19 in their neighborhood (Only in countries where regional data is provided)
+
+## Progress
+
+![](screenshots/map.png)
+![](screenshots/search.png)
